@@ -1,0 +1,99 @@
+<!DOCTYPE>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style type="text/css">
+			.dd-demo{
+			width:200px;
+			height:200px;
+			border:2px solid #d3d3d3;
+			position:absolute;
+		}
+		.proxy{
+			border:1px dotted #333;
+			width:60px;
+			height:60px;
+			text-align:center;
+			background:#fafafa;
+		}
+		#dd1{
+			background:#E0ECFF;
+			left:20px;
+			top:20px;
+		}
+		#dd2{
+			background:#8DB2E3;
+			left:300px;
+			top:20px;
+		}
+		#dd3{
+			background:#FBEC88;
+			left:600px;
+			top:20px;
+		}
+		
+		#dd4{
+			border:1px dotted #333;
+			width:60px;
+			height:60px;
+			text-align:center;
+			background:#fafafa;
+			left:20px;
+			top:20px;
+		}
+		
+		.mydiv{
+		     border:1px dotted #333;
+			width:100px;
+			height:60px;
+			text-align:center;
+			background:red;
+		}
+			
+        </style>
+	
+		<link rel="stylesheet" type="text/css" href="themes/default/easyui.css">
+	    <link rel="stylesheet" type="text/css" href="themes/icon.css">
+		
+		<script type="text/javascript" src="js/jquery.min.js" ></script>
+		<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+	</head>
+	<script>
+	
+		$(function () {
+        $('#dd1').draggable();
+		
+		
+		
+		
+		$('#dd2').draggable({
+			   // revert:'true',         //拖动停止时返回起始位置
+                //handle:'#dd4',
+		    
+
+				
+       });
+	   
+	   
+
+		$('#dd3').draggable({
+			proxy:function(source){
+				var p = $('<div class="mydiv">2</div>');
+				p.appendTo('body');
+				return p;
+			}
+		});
+		});
+		
+	</script>
+	<body>
+		<div id="dd1" class="dd-demo">111</div>
+        <div id="dd2" class="dd-demo">222</div>
+        <div id="dd3" class="dd-demo">333</div>
+		
+		 
+		
+		
+	</body>
+</html>

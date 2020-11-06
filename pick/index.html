@@ -1,0 +1,343 @@
+<!DOCTYPE>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<style type="text/css">
+			
+			.select{
+					width:100px;
+					position:relative;
+					top:100px;
+					left:100px;
+					cursor:pointer;
+					}
+			#id1{
+				margin: 10px auto;
+				width: 800px;
+				height: 200px;
+			}
+			
+			#tb1{
+				margin: 5px auto;
+				width: 800px;
+				
+			}
+			
+		 table.gridtable {
+		    font-family: verdana,arial,sans-serif;
+		   font-size:11px;
+		      color:#333333;
+		     border-width: 1px;
+		      border-color: #666666;
+		      border-collapse: collapse;
+		 }
+		 table.gridtable th {
+		     border-width: 1px;
+		     padding: 8px;
+		     border-style: solid;
+		     border-color: #666666;
+		     background-color: #dedede;
+		 }
+		 table.gridtable td {
+		     border-width: 1px;
+		     padding: 8px;
+		     border-style: solid;
+		     border-color: #666666;
+		     background-color: #ffffff;
+		 }
+    </style>
+	
+		<link rel="stylesheet" type="text/css" href="themes/default/easyui.css">
+	    <link rel="stylesheet" type="text/css" href="themes/icon.css">
+		
+		<script type="text/javascript" src="js/jquery.min.js" ></script>
+		<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+	</head>
+	<script>
+	var flag1=1,flag2=1;	
+	var rs={};
+	var nameList=[];
+	
+	//产生随机数组 num:生成随机数个数；min:生成随机数范围最小值，max:生成随机数范围最大值
+	function createRandom(num ,min ,max)
+  {
+      var res=[];
+      var i=0;
+      while(i<num){
+      	var rang = min + Math.round((max-min)*Math.random());  
+      	if(res.indexOf(rang)==-1){
+      		i++;
+      		res.push(rang);
+      	}
+      }
+      
+     return res;
+ }
+ 
+     //上传文件
+	  function upload(input) {  
+            //支持chrome IE10  
+            if (window.FileReader) {  
+                var file = input.files[0];  
+                filename = file.name.split(".")[0];  
+                var reader = new FileReader();  
+                reader.onload = function() {  
+                    rs.txt =this.result;  
+                   // alert(rs); 
+                }  
+                reader.readAsText(file);  
+            }   
+            //支持IE 7 8 9 10  
+            else if (typeof window.ActiveXObject != 'undefined'){  
+                var xmlDoc;   
+                xmlDoc = new ActiveXObject("Microsoft.XMLDOM");   
+                xmlDoc.async = false;   
+                xmlDoc.load(input.value);   
+                rs.txt =xmlDoc.xml
+               // alert(rs); 
+                //console.log(xmlDoc.xml);   
+            }   
+            //支持FF  
+            else if (document.implementation && document.implementation.createDocument) {   
+                var xmlDoc;   
+                xmlDoc = document.implementation.createDocument("", "", null);   
+                xmlDoc.async = false;   
+                xmlDoc.load(input.value);   
+                rs.txt =xmlDoc.xml
+               // alert(rs); 
+                //console.log(xmlDoc.xml);  
+            } else {   
+                alert('浏览器不支持导入数据！');   
+            }   
+        }  
+        
+	
+	$(document).ready(function(){
+		 var clicktag = 0;
+		 var zyList=[];
+		
+		//初始化名单
+		$("#ip").click(function(){
+		//导入文本数据，存放到数组nameList里面
+		if(!rs.txt){
+		 $.messager.alert('提示','请上传名单文件！','Info');
+		 return;
+		}
+			nameList = rs.txt.replace(/\r/g,'').split('\n');
+			
+			//alert('已经初始化 '+nameList.length+' 个名单');
+			
+			 $.messager.alert('提示','已经初始化 '+nameList.length+' 个名单','Info');
+			
+			for (var i=0;i<nameList.length;i++) {
+				if(zyList.indexOf(nameList[i].split("|")[3].trim()) ==-1)
+		          zyList.push(nameList[i].split("|")[3].trim());
+			}
+			
+			//初始化下拉框专业数据
+			$("#zy").empty();
+			for (var i=0;i<zyList.length;i++) {
+				$('#zy').append("<option value='"+zyList[i].trim()+"'>"+zyList[i].trim()+"</option>");
+			}
+			
+      });
+      
+    
+
+      //计算抽取总数
+      $("#bk").change(function(){
+      	var bk1=isNaN(parseInt($("#bk").val()))==true?0:parseInt($("#bk").val());
+      	var gz1=isNaN(parseInt($("#gz").val()))==true?0:parseInt($("#gz").val());
+      	
+         $("#total").val(bk1+gz1);
+      });
+   
+   $("#gz").change(function(){
+        var bk1=isNaN(parseInt($("#bk").val()))==true?0:parseInt($("#bk").val());
+      	var gz1=isNaN(parseInt($("#gz").val()))==true?0:parseInt($("#gz").val());
+      	
+         $("#total").val(bk1+gz1);
+     });
+   
+   
+        
+     
+       //抽取名单
+        $("#btn").click(function(){   	
+       if(document.getElementById("file1").value == null || document.getElementById("file1").value == ""){
+		$.messager.alert('警告','请上传文件！','warning');
+       	return;
+       }
+       if(nameList.length<1){
+	   $.messager.alert('警告','请导入数据','warning');
+		return;
+       }
+       
+	   let tt=isNaN(parseInt($("#total").val()))==true?0:parseInt($("#total").val());
+	    if(tt<1){
+	   $.messager.alert('警告','请设置抽取人数！','warning');
+		return;
+       }
+       
+       
+       //抽取名单
+       //选择校内还是校外
+        let slfw=$("input:radio[name='fw']:checked").val().trim();
+        //选择专业
+        let slzy =$("#zy option:selected").val().trim();
+        
+        //alert("slfw:"+slfw);
+        //alert("slzy:"+slzy);
+       	let bk1=isNaN(parseInt($("#bk").val()))==true?0:parseInt($("#bk").val());
+      	let gz1=isNaN(parseInt($("#gz").val()))==true?0:parseInt($("#gz").val());
+      	
+      	//alert("bk1:"+bk1);
+      	//alert("gz1:"+gz1);
+      
+      	
+      	let arr1s = nameList.concat();
+      	let rs1 =[],bkList=[],gzList=[],xnList=[],xwList=[];
+      	
+      	//数据按办学类别分组
+      	//alert("arr1s.length"+arr1s.length);
+      	//alert(arr1s[1011]);
+      	for (var i=0;i<arr1s.length;i++) {
+      		if(arr1s[i].split('|')[5].trim()==slfw.trim() && arr1s[i].split('|')[3].trim()==slzy.trim())
+      		
+      		{  
+      			
+      			if(arr1s[i].split('|')[4].trim()=='本科')bkList.push(arr1s[i]);
+      			if(arr1s[i].split('|')[4].trim()=='高职')gzList.push(arr1s[i]);
+      		}
+      		
+      	}
+      	
+      	//alert("bkList.length:"+bkList.length);
+      	//alert("gzList.length:"+gzList.length);
+      	if(bk1>bkList.length){
+		   $.messager.alert('警告','您设置抽取本科的人数大于导入数据本科的人数，请重新设置！','error');
+      		return;
+      	}
+      		if(gz1>gzList.length){
+			 $.messager.alert('警告','您设置抽取高职的人数大于导入数据高职的人数，请重新设置！','error');
+      		return;
+      	}
+      
+	  //生成抽取随机数组
+      	var rdombk = createRandom(bk1,0,bkList.length-1);
+      	var rdomgz = createRandom(gz1,0,gzList.length-1);
+      	//alert(rdombk);
+      	//alert(rdomgz);
+		
+		//随机抽取名本科单放到数组rs1中
+      	for (var i = 0; i < rdombk.length; i++) {
+      		if(bkList[rdombk[i]])
+      		rs1.push(bkList[rdombk[i]]);
+      		//else alert(rdombk[i]);
+      		//bkList.splice(rdombk[i],1);
+      	}
+      	//随机抽取名高职单放到数组rs1中
+      	for (var i = 0; i < rdomgz.length; i++) {
+      		if(gzList[rdomgz[i]])
+      		rs1.push(gzList[rdomgz[i]]);
+      		//else alert(rdomgz[i]);
+      		//gzList.splice(rdomgz[i],1);
+      	}
+      	
+      	//alert(rs1.length);
+      	//在表格中显示随机抽取的名单
+      	$("#tb1 tr:not(:first)").remove();  
+		$("#tb1").append('<tbody>');
+      	for (var i=0;i<rs1.length;i++) {
+      		var str = '<tr><td>'+(i+1)+'</td><td>'+rs1[i].split('|')[1]+'</td><td>'+rs1[i].split('|')[2]+
+      		'</td><td>'+rs1[i].split('|')[3]+'</td><td>'+rs1[i].split('|')[4]+'</td><td>'+rs1[i].split('|')[5]+'</td></tr>'
+      		$("#tb1").append(str);
+      	}
+      $("#tb1").append('</tbody>');
+       
+       
+      });
+        
+   
+});
+		
+		
+	</script>
+	<body>
+		
+		
+		<div id="id1">
+		<input type="file" id='file1' name="file1" onchange="upload(this)" />  &nbsp;&nbsp;&nbsp; <input type="button" name="ip" id="ip" value="导入数据" />
+			<br/>
+			<hr>
+		<br/>
+			<table width="800px">
+				<tr>
+					<td rowspan="3"><b>条件设置:&nbsp;&nbsp;&nbsp;</b></td>
+					<td>人数设置:</td>
+					
+					<td colspan="2">
+						&nbsp;&nbsp;&nbsp;本科&nbsp;&nbsp;<input type="text" value="0" size="5" name="bk" id="bk" oninput="value=value.replace(/[^\d]/g,'')">
+                  &nbsp;&nbsp;&nbsp;高职&nbsp;&nbsp;<input type="text" value="0" size="5" name="gz" id="gz" oninput="value=value.replace(/[^\d]/g,'')">
+		
+					</td>
+					
+					
+					<td rowspan="2">
+						总数：<input type="text"  size="5" value="0" name="total" id="total" oninput="value=value.replace(/[^\d]/g,'')">
+             		</td>
+					
+					
+				</tr>
+				
+				
+				<tr>
+					<td>范围:</td>
+					<td colspan="2">
+						<label><input name="fw" id="fw1" type="radio" value="校内" checked/>校内</label> 
+                        <label><input name="fw" id="fw2" type="radio" value="校外" />校外</label> 
+					</td>
+					
+				</tr>
+				
+				<tr>
+					<td>专业:</td>
+					<td colspan="2">
+						<select name="zy" id="zy">   
+					      
+					      </select> 
+					</td>
+					
+				</tr>
+				
+				
+				
+				
+				
+				
+				
+			</table>
+			<hr>
+			
+			<div style="margin: 10px auto; width: 800px; text-align: center;">
+				 <input type="button" name="btn" id="btn" value="点击随机抽取名单"> 
+			</div>
+			
+               
+		</div>
+		
+		<hr/>
+		
+		<div id="list1">
+			<table  class="gridtable" id="tb1">
+			<thead>
+				<tr>
+					<th>序号</th> <th>姓名</th><th>单位</th><th>专业</th><th>办学类别</th><th>范围</th>
+				</tr>
+				</thead>
+				
+			</table>
+		</div>
+		
+	</body>
+</html>
